@@ -3,6 +3,11 @@ import pandas as pd
 import numpy as np
 import pydeck as pdk
 
+# Import simulation model
+import sys
+sys.path.append('banksim')
+from banksim import model
+
 #edit later with directory to lat long data for branches
 branch_data = pd.read_csv('data/Compiled_Data.csv')
 
@@ -28,8 +33,8 @@ col1, col2 = st.columns([6, 4])
 
 with col2:
     option = st.selectbox(
-    'Choose your BPI Branch:',
-    branch_data['BPI Branch']
+        'Choose your BPI Branch:',
+        branch_data['BPI Branch']
     )
     st.subheader("Line Graph")
     if option in plt_dat.columns:
@@ -37,7 +42,25 @@ with col2:
     else:
         st.warning(f"No data available for '{option}'. Please select a valid branch.")
 
-    
+    # --- Simulation Integration ---
+    # Find the row for the selected branch
+    branch_row = branch_data[branch_data['BPI Branch'] == option].iloc[0]
+    # Prepare parameters for the simulation (fill missing with defaults)
+    sim_params = model.Experiment().__dict__.copy()
+    # Overwrite with any matching columns from branch_row
+    for col in branch_row.index:
+        if col in sim_params:
+            sim_params[col] = branch_row[col]
+    # Create Experiment and run simulation
+    exp = model.Experiment(**sim_params)
+    sim_results = model.single_run(exp)
+    # Display results
+    st.subheader("Simulation Results")
+    st.write(f"**Mean Wait Time:** {sim_results['01_mean_wait_time']:.2f} mins")
+    st.write(f"**Teller Utilization:** {sim_results['02_teller_util']:.2f}%")
+    st.write(f"**Mean Outside Wait Time:** {sim_results['03_mean_outside_wait_time']:.2f} mins")
+    st.write(f"**Long Teller Utilization:** {sim_results['04_long_teller_util']:.2f}%")
+    # --- End Simulation Integration ---
 
 with col1:
     st.subheader("Map")
