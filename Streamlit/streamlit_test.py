@@ -3,14 +3,17 @@ import pandas as pd
 import numpy as np
 import pydeck as pdk
 
+#edit later with directory to lat long data for branches
+branch_data = pd.read_csv('data/Compiled_Data.csv')
+
 test_ = "testing!"
 
 st.write(test_)
 
 
-loc_dict= {'Branch Name': ['Apple', 'Banana', 'Mango', 'Strawberry', 'Trial1', 'Trial2', 'Trial3'],
-           'lat': [ 14.6401984, 14.6157534,14.6445752,14.6390686, 14.6236143,14.6366666, 14.6034851], 
-           'lon': [ 121.0742878,  121.070107, 121.048706, 121.074222, 121.0539746, 121.0281416,  121.078829]}
+loc_dict= {'Branch Name': branch_data['BPI Branch'],
+           'lat': branch_data['Latitude'], 
+           'lon': branch_data['Longitude']}
 
 chart_df = pd.DataFrame.from_dict(loc_dict)
 
@@ -26,7 +29,7 @@ col1, col2 = st.columns([6, 4])
 with col2:
     option = st.selectbox(
     'Choose your BPI Branch:',
-    ['Apple', 'Banana', 'Mango', 'Strawberry', 'Trial1', 'Trial2', 'Trial3']
+    branch_data['BPI Branch']
     )
     st.subheader("Line Graph")
     if option in plt_dat.columns:
@@ -64,3 +67,5 @@ with col1:
     )
 
     st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view_state))
+
+
