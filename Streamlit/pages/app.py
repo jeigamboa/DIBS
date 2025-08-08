@@ -4,11 +4,6 @@ import pandas as pd
 import folium
 from streamlit_folium import folium_static
 import xml.etree.ElementTree as ET
-<<<<<<< HEAD
-#Test change
-=======
-
->>>>>>> 1bde83dbbeac880f79556383e4238b5dd668bf31
 # Title
 st.title("BPI Branch Node Map - Katipunan Loyola (Quezon City)")
 
