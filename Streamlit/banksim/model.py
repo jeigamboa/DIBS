@@ -305,56 +305,60 @@ def service(identifier, env, args, customer_type):
     start_wait = env.now
 
     #request an operator. parameters defined in Experiment
-    with args.cell.request() as cell_req:
-        yield cell_req
 
-        outside_wait_time = env.now - start_wait
-        args.results['outside_waiting_times'].append(outside_wait_time)
-        args.results['outside_waiting_times_time_of_arrival'].append(start_wait)
+    if customer_type=="short":
+
+        with args.cell.request() as cell_req:
+            yield cell_req
+
+            outside_wait_time = env.now - start_wait
+            args.results['outside_waiting_times'].append(outside_wait_time)
+            args.results['outside_waiting_times_time_of_arrival'].append(start_wait)
+
+        with args.operators.request() as req:
+            yield req
+
+            wait_time = env.now - start_wait
+
+            args.results['short_transact_waiting_times'].append(wait_time) 
+            #transaction waiting times are inclusive of the outside waiting time
+            args.results['short_transact_time_of_arrival'].append(start_wait)
+
+            call_duration = args.call_dist.sample()
+
+            #sched process to begin after call_duration
+            yield env.timeout(call_duration)
+
+            args.results['total_short_transact_duration'] += call_duration
+            
+    elif customer_type =='long':
         
+        with args.cell.request() as cell_req:
+            yield cell_req
 
-        if customer_type=="short":
+            outside_wait_time = env.now - start_wait
+            args.results['outside_waiting_times'].append(outside_wait_time)
+            args.results['outside_waiting_times_time_of_arrival'].append(start_wait)    
 
-            with args.operators.request() as req:
-                yield req
+        with args.long_operators.request() as long_req:
+            yield long_req
+            
+            wait_time = env.now - start_wait
 
-                wait_time = env.now - start_wait
-
-                args.results['short_transact_waiting_times'].append(wait_time) 
-                #transaction waiting times are inclusive of the outside waiting time
-                args.results['short_transact_time_of_arrival'].append(start_wait)
-
-                call_duration = args.call_dist.sample()
-
-                #sched process to begin after call_duration
-                yield env.timeout(call_duration)
-
-                args.results['total_short_transact_duration'] += call_duration
-                
-        elif customer_type =='long':
-            with args.long_operators.request() as long_req:
-                yield long_req
-                
-                wait_time = env.now - start_wait
-
-                args.results['long_transact_waiting_times'].append(wait_time)
-                #long transaction waiting times are inclusive of outside waiting times
-                args.results['long_transact_time_of_arrival'].append(start_wait)
+            args.results['long_transact_waiting_times'].append(wait_time)
+            #long transaction waiting times are inclusive of outside waiting times
+            args.results['long_transact_time_of_arrival'].append(start_wait)
 
 
-                call_duration = args.long_call_dist.sample()
+            call_duration = args.long_call_dist.sample()
 
-                #sched process to begin after call_duration
-                yield env.timeout(call_duration)
+            #sched process to begin after call_duration
+            yield env.timeout(call_duration)
 
-                args.results['total_long_transact_duration'] += call_duration
+            args.results['total_long_transact_duration'] += call_duration
 
-                trace(
-                    f'long transaction {identifier} ended {env.now:.2f};' \
-                    + f'wait time was {wait_time:.2f}'
-                )
-        else:
-            raise ValueError(f"Unknown customer type: {customer_type}")
+    else:
+        raise ValueError(f"Unknown customer type: {customer_type}")
         
 def bell_curve(x, mu, sigma):
 
