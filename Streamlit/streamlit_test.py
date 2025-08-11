@@ -46,13 +46,13 @@ with col2:
     # Find the row for the selected branch
     branch_row = branch_data[branch_data['BPI Branch'] == option].iloc[0]
     # Prepare parameters for the simulation (fill missing with defaults)
-    sim_params = model.Experiment().__dict__.copy()
+    #sim_params = model.Experiment().__dict__.copy()
     # Overwrite with any matching columns from branch_row
-    for col in branch_row.index:
-        if col in sim_params:
-            sim_params[col] = branch_row[col]
+    #for col in branch_row.index:
+    #    if col in sim_params:
+    #        sim_params[col] = branch_row[col]
     # Create Experiment and run simulation
-    exp = model.Experiment(**sim_params)
+    exp = model.Experiment()
     sim_results = model.single_run(exp)
     # Display results
     st.subheader("Simulation Results")
