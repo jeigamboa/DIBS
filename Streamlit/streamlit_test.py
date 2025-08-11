@@ -3,6 +3,13 @@ import pandas as pd
 import numpy as np
 import pydeck as pdk
 
+# Load CSS file
+def local_css(file_name):
+    with open(file_name) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+local_css("styles/style.css")  # Adjust path as needed
+
 # Import simulation model
 import sys
 sys.path.append('banksim')
@@ -32,6 +39,7 @@ plt_dat = pd.DataFrame.from_dict({'x':x, 'Apple':Apple, 'Banana': Banana, 'Mango
 col1, col2 = st.columns([6, 4])
 
 with col2:
+    st.markdown('<div class="right-panel">', unsafe_allow_html=True)
     option = st.selectbox(
         'Choose your BPI Branch:',
         branch_data['BPI Branch']
@@ -61,8 +69,10 @@ with col2:
     st.write(f"**Mean Outside Wait Time:** {sim_results['03_mean_outside_wait_time']:.2f} mins")
     st.write(f"**Long Teller Utilization:** {sim_results['04_long_teller_util']:.2f}%")
     # --- End Simulation Integration ---
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with col1:
+    st.markdown('<div class="left-panel">', unsafe_allow_html=True)
     st.subheader("Map")
 
     # Add color column: red for selected, blue for others
@@ -90,5 +100,4 @@ with col1:
     )
 
     st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view_state))
-
-
+    st.markdown('</div>', unsafe_allow_html=True)
