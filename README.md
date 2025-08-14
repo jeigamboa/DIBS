@@ -8,6 +8,6 @@ Project submitted to the BPI DATA Wave 2025 Hackathon, powered by Eskwelabs, by 
 all of whom are affiliated with the National Institute of Physics at the time of the Hackathon.
 
 Contents:
-gen_AI = directory for all gen_AI APIs and capabilities \\
-Streamlit = directory for project prototyping \\
-Hello world.ipynb = initializing \\
+- gen_AI = directory for all gen_AI APIs and capabilities
+- Streamlit = directory for project prototyping
+- Hello world.ipynb = initializing
