@@ -55,6 +55,8 @@ LONG_CALL_HIGH = 100
 # sampling settings
 N_STREAMS = 4 #DO NOT change
 DEFAULT_RND_SET = 0
+LOW_UNIF = 1
+HIGH_UNIF = 100
 
 # Boolean switch to simulation results as the model runs
 TRACE = False
@@ -62,6 +64,15 @@ TRACE = False
 # run variables
 RESULTS_COLLECTION_PERIOD = 60*8
 N_METRICS = 4 #we have mean_wait_time, teller_util, outside_mean_wait_time, long_teller_util
+
+class Uniform:
+    def __init__(self, low, high, random_seed = None):
+        self.rand = np.random.default_rng(seed = random_seed)
+        self.low = low
+        self.high = high
+    
+    def sample(self, size=None):
+        return self.rand.integers(self.low, self.high, size=size)
 
 class Triangular:
     def __init__(self, low, mode, high, random_seed = None):
@@ -121,6 +132,48 @@ class NormalDistribution:
         """
         return self.rand.normal(loc=self.mean, scale=self.std_dev, size=size)
     
+class daily_rand:
+    def __init__(
+        self,
+        random_number_set=  DEFAULT_RND_SET,
+        low_unif = LOW_UNIF,
+        high_unif = HIGH_UNIF,
+        n_streams=  N_STREAMS 
+    ):
+        # sampling
+        self.random_number_set = random_number_set
+        self.n_streams = n_streams
+        self.low_unif = low_unif
+        self.high_unif = high_unif
+        
+        # store parameters for the run of the model
+        
+    
+    def set_random_no_set(self, random_number_set):
+        """
+        Controls the random sampling
+        Parameters:
+        ----------
+        random_number_set: int
+            Used to control the set of pseudo random numbers used by 
+            the distributions in the simulation.
+        """
+        self.random_number_set = random_number_set
+        self.init_sampling()
+
+    def init_sampling(self):
+        """
+        Create the distributions used by the model and initialise
+        the random seeds of each.
+        """
+        # produce n non-overlapping streams
+        seed_sequence = np.random.SeedSequence(self.random_number_set)
+        self.seeds = seed_sequence.spawn(self.n_streams)
+
+        # create distributions
+
+        # call inter-arrival times
+        self.daily_rand = Uniform(self.low_unif, self.high_unif, random_seed=self.seeds[0])
 
     
 class Experiment:
@@ -166,35 +219,30 @@ class Experiment:
         self.random_number_set = random_number_set
         self.n_streams = n_streams
         
-        #Resources
+        # store parameters for the run of the model
         self.n_operators = n_operators
         self.n_long_operators = n_long_operators
-        self.customer_capacity = customer_capacity
 
-        #parameters for time-varying mean inter-arrival time
-        #Time varying mean inter-arrival time for short transactions
+        #
         self.base_mean_iat = base_mean_iat
         self.base_var_iat = base_var_iat
-        #use assigned value Experiment(long_iat=value) if assigned. if none assigned, calculate from base_var_iat
         self.short_iat = short_iat if short_iat is not None else base_mean_iat - base_var_iat
         self.long_iat = long_iat if short_iat is not None else base_mean_iat + base_var_iat
 
-        #Time varying mean inter-arrival time for long transactions
         self.long_transact_base_mean_iat = long_transact_base_mean_iat
         self.long_transact_base_var_iat = long_transact_base_var_iat
-        #use assigned value Experiment(long_transact_long_iat=value) if assigned. if none assigned, calculate from long_transact_base_var_iat
         self.long_transact_long_iat = long_transact_long_iat if long_transact_long_iat is not None else long_transact_base_mean_iat + long_transact_base_var_iat
         self.long_transact_short_iat = long_transact_short_iat if long_transact_short_iat is not None else long_transact_base_mean_iat - long_transact_base_var_iat
 
-        #Transaction time parameters
         self.call_low =         call_low
         self.call_mode =        call_mode
         self.call_high =        call_high
         self.long_call_low =    long_call_low
         self.long_call_mode = long_call_mode
-        self.long_call_high = long_call_high    
+        self.long_call_high = long_call_high
 
-        #Assign peak hours of traffic in bank
+        self.customer_capacity = customer_capacity
+    
         self.peak_min = peak_min
         self.peak_min_standard_deviation = peak_min_standard_deviation
         
@@ -217,8 +265,6 @@ class Experiment:
         if self.long_transact_base_var_iat >= self.long_transact_base_mean_iat:
             raise ValueError(
                 f"`long_transact_base_var_iat` ({self.long_transact_base_var_iat }) must be smaller than `long_transact_base_mean_iat` ({self.long_transact_base_mean_iat })")
-
-        
 
     def set_random_no_set(self, random_number_set):
         """
@@ -284,6 +330,43 @@ class Experiment:
         # total operator usage time for utilisation calculation.
         self.results["total_short_transact_duration"] = 0.0
         self.results['total_long_transact_duration'] = 0.0
+
+def periodic_exp(x_arr, b, k, max_day, rate):
+    y = (b-k)*np.exp((x_arr-max_day)/rate)+k
+    return y
+
+def rescale_exp(force_max, force_min, max_day, rate):
+    """Rescales the parameters for the exponential function based on the desired maximum value and minimum value at specific x.
+    Solved this by hand from the periodic exponential function."""
+    b = force_max
+    k = (force_min-b*np.exp(-max_day/rate))/(1-np.exp(-max_day/rate))
+    return b, k, max_day, rate
+
+def salary_iat_variation(last_day_of_month=30, force_max=5, force_min=3, rate=5):
+    """Generates a list of varying daily mean inter-arrival times.
+    Based on the behavior that more short transactions occur on and after the 15th and the 30th."""
+
+    calendar_days = np.array([k+1 for k in range(last_day_of_month)])
+    blank_arr = np.zeros(last_day_of_month)
+    peak_days = [0, 15, last_day_of_month]
+    select1= np.where((calendar_days > peak_days[0])*(calendar_days < peak_days[1]))
+    select2 = np.where((calendar_days > peak_days[1]-1)*(calendar_days < peak_days[2]))
+    select3 = np.where((calendar_days >= peak_days[2]))
+
+    blank_arr[select1] = periodic_exp(calendar_days[select1], *rescale_exp(force_max, force_min, peak_days[1]-1, rate=rate))
+    blank_arr[select2] = periodic_exp(calendar_days[select2], *rescale_exp(force_max, force_min, peak_days[2]-1, rate=rate))
+    blank_arr[select3] = periodic_exp(calendar_days[select3], *rescale_exp(force_max, force_min, peak_days[2]-1 + 15, rate=rate))
+    #blank_arr[peak_days[0]] = force_min
+    blank_arr[peak_days[1]-1] = force_min
+    if peak_days[2] == 30:
+        blank_arr[peak_days[2]-1] = force_min 
+    elif peak_days[2] == 31:
+        blank_arr[peak_days[2]-2] = force_min
+    elif peak_days[2] == 28:
+        blank_arr[peak_days[2]-1] = force_min
+    elif peak_days[2] == 29:
+        blank_arr[-1] = force_min
+    return calendar_days, blank_arr
 
 def service(identifier, env, args, customer_type):
     '''simulates service process for a teller
@@ -364,13 +447,13 @@ def bell_curve(x, mu, sigma):
 
     return np.exp(-(x-mu)**2/(2*(sigma**2)))
 
-def get_dynamic_mean_iat(current_time_, short_iat_, long_iat_, peak_min_, peak_min_standard_deviation_):
+def get_dynamic_mean_iat(current_time_, base_mean_iat_, base_var_iat_, peak_min_, peak_min_stddev_):
     """
-    Returns a dynamic mean inter-arrival time based on current simulation time.
+    Daily oscillation around a base mean inter-arrival time.
+    base_var_iat_ is the amplitude of oscillation.
     """
-
-    mean_iat = short_iat_ + (long_iat_-short_iat_)*(1-bell_curve(current_time_, peak_min_, peak_min_standard_deviation_))
-    return mean_iat
+    fluctuation = base_var_iat_ * (1 - bell_curve(current_time_, peak_min_, peak_min_stddev_))
+    return max(0.01, base_mean_iat_ + fluctuation)
 
 def arriv_gen(env, args):
 
@@ -436,6 +519,85 @@ def single_run(experiment, rep=0, rc_period=RESULTS_COLLECTION_PERIOD):
 
     return run_results
 
+def month_run(blank_xp, 
+              last_day_of_month, 
+              force_max, 
+              force_min, 
+              rate = 5, 
+              seed = 0, 
+              rand_toggle=False, 
+              rc_period = RESULTS_COLLECTION_PERIOD):
+    """"
+    Runs simulations for a whole month of operations, assuming that there is an increase of incoming short transaction customers during salary days.
+    Params:
+    blank_xp = Experiment() to be loaded, with some fixed parameters
+    last_day_of_month = Last day of the month. Can be 28, 29, 30, 31.
+    force_max = Maximum daily mean inter-arrival time. This is the inter-arrival time for short transaction customers on the day with the lowest traffic.
+    force_min = Minimum daily mean inter-arrival time. This is the inter-arrival time for short transaction customers on salary days/high traffic days.
+    rate = growth rate of the daily mean IAT. larger rate means daily IAT is lower on most days
+    seed = random seed used for the run. Can be used to rerun specific "scenarios".
+    rand_toggle = If True, then every day uses a different set of random numbers for sampling. Otherwise, rand_toggle=False causes the same set of random numbers to be used for sampling despite rerunning the simulation.
+    rc_period = results collection period.
+    """
+    
+    run_days = [k for k in range(last_day_of_month)]
+    rand = daily_rand()
+
+    if rand_toggle:
+        random_int = np.random.randint(1, 100)
+        rand.set_random_no_set(random_int)
+    else:
+        rand.set_random_no_set(seed)
+
+    run_seed = [rand.daily_rand.sample() for k in run_days]
+
+    base_iats = salary_iat_variation(last_day_of_month=last_day_of_month, 
+                                     force_max=force_max, 
+                                     force_min=force_min, 
+                                     rate=rate)[1]
+
+    run_results = {}
+    run_results['01_1month_mean_wait_time'] = []
+    run_results['02_1month_teller_util'] = []
+    run_results['03_1month_mean_outside_wait_time'] = []
+    run_results['04_1month_long_teller_util'] = []
+
+    exclude_vars = ['base_mean_iat', 'operators', 'long_operators', 'cell', 'results', 'seeds', 'arrival_dist', 'call_dist',
+                    'long_call_dist']
+
+    ddd = {key: value for key, value in blank_xp.__dict__.items() if key not in exclude_vars}
+
+    for k in range(len(run_days)):
+        experiment = Experiment(**ddd, base_mean_iat=base_iats[k])
+        experiment.init_results_variables()
+        experiment.set_random_no_set(run_seed[k])
+
+        env = simpy.Environment()
+
+        experiment.init_results_variables()
+
+        experiment.set_random_no_set(run_seed[k])
+        #each time you run replication number 2,
+        #you run random number set 2
+        experiment.base_mean_iat = base_iats[k]
+
+        env = simpy.Environment()
+        experiment.operators = simpy.Resource(env, capacity=experiment.n_operators)
+        experiment.cell = simpy.Resource(env, capacity=experiment.customer_capacity)
+        experiment.long_operators = simpy.Resource(env, capacity=experiment.n_long_operators)
+
+        env.process(arriv_gen(env, experiment))
+        env.process(long_arriv_gen(env, experiment))
+        env.run(until=rc_period)
+
+        #results that summarize the run for the day
+        run_results['01_1month_mean_wait_time'].append(np.mean(experiment.results['short_transact_waiting_times']))
+        run_results['02_1month_teller_util'].append(experiment.results['total_short_transact_duration'] / (rc_period * experiment.n_operators)*100.0)
+        run_results['03_1month_mean_outside_wait_time'].append(np.mean(experiment.results['outside_waiting_times']))
+        run_results['04_1month_long_teller_util'].append(experiment.results['total_long_transact_duration'] / (rc_period * experiment.n_long_operators)*100.0)
+
+
+    return run_results
 
 def parallel_run_one_day(data, rep=0):
 
