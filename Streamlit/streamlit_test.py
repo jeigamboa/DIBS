@@ -57,13 +57,10 @@ with header_col2:
         """
         <div class="app-header">
             <div style="font-size:1.8em;font-weight:700;color:#222;margin-bottom:4px;">Building a better Philippines — one family, one community at a time</div>
-            <div style="font-size:1em;color:#666;margin-top:0;">Inspired by BPI's vision</div>
+            <div style="font-size:1em;color:#666;margin-top:0;">Inspired by BPI's vision
         </div>
         """, unsafe_allow_html=True
     )
-
-st.markdown('<div style="margin-top: 1em;"></div>', unsafe_allow_html=True)
-st.markdown('<div style="font-size:1.2em; margin-bottom:0.5em;">testing!</div>', unsafe_allow_html=True)
 
 col1, col2 = st.columns([6, 4], gap="large")
 
@@ -124,4 +121,6 @@ with col2:
         </div>
         """, unsafe_allow_html=True
     )
+    st.markdown('</div>', unsafe_allow_html=True)
+    
     st.markdown('</div>', unsafe_allow_html=True)

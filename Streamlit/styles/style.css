@@ -57,8 +57,12 @@ div.stButton > button:first-child:hover::after {
     color: #222 !important;
     box-shadow: 2px 0 8px rgba(0,0,0,0.03);
 }
+.stSidebar {
+    background-color: #222 !important;  /* dark background */
+    color: #fff !important;             /* white text */
+}
 .stSidebar nav, .stSidebar ul, .stSidebar li {
-    color: #222 !important;
+    color: #fff !important;             /* white nav items */
 }
 
 /* Pydeck container tweaks */
@@ -69,7 +73,9 @@ div.stButton > button:first-child:hover::after {
     box-shadow: 0 2px 12px rgba(0,0,0,0.06);
 }
 
-/* Panel backgrounds */
+
+
+/* Panel backgrounds
 .left-panel, .right-panel {
     background: #fff !important;
     box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
@@ -77,7 +83,7 @@ div.stButton > button:first-child:hover::after {
     padding: 2em 2em 1.5em 2em !important;
     margin-bottom: 1.5em;
 }
-
+*/
 /* Selectbox */
 .stSelectbox > div {
     background: #fff;
