@@ -1,31 +1,137 @@
 /* App background */
 .stApp {
-    background-color: #2391ff;
-    font-family: 'Comic Sans MS', sans-serif;
+    background-color: #f7f7f9;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    color: #222;
 }
 
 /* Headings */
 h1, h2, h3 {
-    color: #2c3e50;
+    color: #222;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.5px;
 }
 
 /* Buttons */
 div.stButton > button:first-child {
-    background-color: #4CAF50;
-    color: ;
-    border-radius: 6px;
-    height: 2.5em;
-    font-weight: bold;
+    background-color: #d32f2f;
+    color: #fff;
+    border-radius: 8px;
     border: none;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-size: 1.08em;
+    padding: 0.7em 2.5em 0.7em 1.5em;
+    box-shadow: 0 2px 8px rgba(211,47,47,0.08);
+    position: relative;
+    transition: background 0.18s, box-shadow 0.18s;
+    outline: none;
+    cursor: pointer;
+}
+div.stButton > button:first-child:hover {
+    background-color: #b71c1c;
+    box-shadow: 0 4px 16px rgba(211,47,47,0.13);
+    color: #fff;
+}
+
+/* Add right arrow to all Streamlit buttons */
+div.stButton > button:first-child::after {
+    content: "→";
+    display: inline-block;
+    margin-left: 0.7em;
+    font-size: 1.1em;
+    font-weight: 700;
+    vertical-align: middle;
+    transition: margin-left 0.18s;
+}
+div.stButton > button:first-child:hover::after {
+    margin-left: 1em;
 }
 
 /* Sidebar styling */
-.css-1d391kg {
-    background-color: #f4f4f4;
+.css-1d391kg, .stSidebar {
+    background-color: #fff !important;
+    border-right: 1px solid #eee !important;
+    color: #222 !important;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.03);
+}
+.stSidebar nav, .stSidebar ul, .stSidebar li {
+    color: #222 !important;
 }
 
 /* Pydeck container tweaks */
 [data-testid="stDeckGlJsonChart"] {
-    border: 2px solid #ddd;
+    border: 1px solid #eee;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+/* Panel backgrounds */
+.left-panel, .right-panel {
+    background: #fff !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+    border-radius: 18px !important;
+    padding: 2em 2em 1.5em 2em !important;
+    margin-bottom: 1.5em;
+}
+
+/* Selectbox */
+.stSelectbox > div {
+    background: #fff;
+    color: #222;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+}
+
+/* Subheaders */
+.stSubheader {
+    color: #222;
+    font-weight: 600;
+    font-size: 1.3em;
+    margin-bottom: 0.8em;
+}
+
+/* Simulation Results */
+.sim-results {
+    background: #f7f7f9;
+    color: #222;
+    font-size: 1.1em;
+    margin-top: 1em;
+    border-radius: 10px;
+    padding: 1em 1.5em;
+    border: 1px solid #eee;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+}
+
+/* Line Graph warning */
+.stAlert {
+    background: #fff;
+    color: #d32f2f !important;
     border-radius: 8px;
+    padding: 0.7em 1.2em;
+    border: 2px solid #d32f2f;
+    font-weight: 500;
+    font-size: 1.08em;
+    box-shadow: 0 2px 8px rgba(211,47,47,0.06);
+    /* Improved contrast and separation */
+}
+.stAlert,
+.stAlert * {
+    color: #000000 !important;
+}
+
+/* Header styling */
+.app-header {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 6px; /* reduced from 12px */
+    margin-top: 0;     /* remove extra vertical offset */
+}
+.app-header img {
+    border-radius: 6px;
 }
