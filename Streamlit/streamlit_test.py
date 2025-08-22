@@ -27,11 +27,13 @@ st.sidebar.markdown("model test")
 st.sidebar.markdown("app")
 
 # Branch data
-branch_data = pd.read_csv('data/Compiled_Data.csv')
+branch_data = pd.read_csv('data/data_with_brgy_population_iat_area.csv')
 
-loc_dict= {'Branch Name': branch_data['BPI Branch'],
+loc_dict= {'Branch Name': branch_data['Branch'],
            'lat': branch_data['Latitude'], 
-           'lon': branch_data['Longitude']}
+           'lon': branch_data['Longitude'],
+           'base_mean_iat': branch_data['Mean_iat'],
+           'branch area': branch_data['Area_sqm']}
 
 chart_df = pd.DataFrame.from_dict(loc_dict)
 
@@ -45,7 +47,7 @@ plt_dat = pd.DataFrame.from_dict({'x':x, 'Apple':Apple, 'Banana': Banana, 'Mango
 
 # Main layout
 # Replace the previous markdown header with a local-image header
-header_img_path = "/Users/jeialdrindaelgamboa/Documents/Projects/DIBS/Streamlit/header.png"  # <-- change filename if needed
+header_img_path = "header.png"  # <-- change filename if needed
 
 # reduce gap and image width so text is closer to the image
 header_col1, header_col2 = st.columns([0.8, 6], gap="small")
@@ -69,7 +71,7 @@ with col1:
     st.subheader("Map")
     # Add color column: red for selected, blue for others
     # Default selection
-    option = st.session_state.get("selected_branch", branch_data['BPI Branch'].iloc[0])
+    option = st.session_state.get("selected_branch", branch_data['Branch'].iloc[0])
     chart_df['color'] = chart_df['Branch Name'].apply(
         lambda name: [255, 0, 0] if name == option else [0, 100, 255]
     )
@@ -97,8 +99,8 @@ with col2:
     st.markdown('<div class="right-panel">', unsafe_allow_html=True)
     option = st.selectbox(
         'BPI Katipunan Loyola Heights...',
-        branch_data['BPI Branch'],
-        index=branch_data['BPI Branch'].tolist().index(option) if option in branch_data['BPI Branch'].tolist() else 0,
+        branch_data['Branch'],
+        index=branch_data['Branch'].tolist().index(option) if option in branch_data['Branch'].tolist() else 0,
         key="selected_branch"
     )
     st.subheader("Line Graph")
@@ -107,8 +109,12 @@ with col2:
     else:
         st.warning(f"No data available for '{option}'. Please select a valid branch.")
     # --- Simulation Integration ---
-    branch_row = branch_data[branch_data['BPI Branch'] == option].iloc[0]
-    exp = model.Experiment()
+    branch_row = branch_data[branch_data['Branch'] == option].iloc[0]
+
+    customer_cap = int(np.ceil(branch_row['Area_sqm']*0.075 / 1)) #calculate customer capacity from branch data.
+    #By default, 7.5% of the area is allocated for waiting area, and one customer occupies one square meter.
+    exp = model.Experiment(base_mean_iat=branch_row['Mean_iat'],
+                           customer_capacity=customer_cap)
     sim_results = model.single_run(exp)
     st.subheader("Simulation Results")
     st.markdown(
