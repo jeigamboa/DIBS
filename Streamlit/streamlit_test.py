@@ -92,7 +92,7 @@ with col1:
         zoom=14,
         pitch=0
     )
-    st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view_state))
+    st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view_state, map_style="light"))
     st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
