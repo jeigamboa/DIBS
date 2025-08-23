@@ -1,0 +1,9 @@
+[theme]
+base="light"
+font = "Inter"
+headingFont = "Inter"
+codeFont = "monospace"
+[theme.sidebar]
+font = "Inter"
+headingFont = "Inter"
+codeFont = "monospace"

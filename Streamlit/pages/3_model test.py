@@ -12,7 +12,7 @@ with st.sidebar:
     WAITING_AREA = 10 #in sq.m . this is a test pa lang we should pribably get waiting_area allocated from bank area & ratio of floor area dedicated to waiting area
     
     ###Customer preferences and behavior
-    customer_preferred_area = st.slider('Area occupied by a customer (sq. m)', 0.5, 2.5, 1.0, step=0.05)
+    customer_preferred_area = st.slider('Area per customer (sq. m)', 0.5, 2.5, 1.0, step=0.05)
     #mean_iat = st.slider('Mean Inter-Arrival Time (mins)', 1.0, 7.0, 2.0, step=0.05) #fix later
     #long_transact_mean_iat = st.slider('Long Transaction Mean Inter-Arrival Time (mins)', 45, 180, 75 , step=1,
     #                                   help='Set the probability that an incoming customer will do a long transaction.')
