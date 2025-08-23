@@ -66,6 +66,7 @@ with header_col2:
 
 col1, col2 = st.columns([6, 4], gap="large")
 
+
 with col1:
     st.markdown('<div class="left-panel">', unsafe_allow_html=True)
     st.subheader("Map")

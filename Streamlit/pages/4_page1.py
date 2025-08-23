@@ -102,6 +102,7 @@ with col2:
     ###Run simulation of default
     branch_row = branch_data[branch_data['Branch'] == option].iloc[0]
 
+
     customer_cap = int(np.ceil(branch_row['Area_sqm']*0.075 / 1)) #calculate customer capacity from branch data.
     #By default, 7.5% of the area is allocated for waiting area, and one customer occupies one square meter.
     exp = model.Experiment(base_mean_iat=branch_row['Mean_iat'],
