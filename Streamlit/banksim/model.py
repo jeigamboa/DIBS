@@ -456,12 +456,17 @@ def get_dynamic_mean_iat(current_time_, base_mean_iat_, base_var_iat_, peak_min_
     return max(0.01, base_mean_iat_ + fluctuation)
 
 def arriv_gen(env, args):
-
+    
     for caller_count in itertools.count(start=1):
         # Get dynamic mean IAT based on current simulation time
         current_time = env.now
-        dynamic_mean_iat = get_dynamic_mean_iat(current_time, args.short_iat, args.long_iat, args.peak_min, args.peak_min_standard_deviation)
-        
+        dynamic_mean_iat = get_dynamic_mean_iat(
+            current_time,
+            args.base_mean_iat,
+            args.base_var_iat,
+            args.peak_min,
+            args.peak_min_standard_deviation)
+
         # Sample with updated mean
         inter_arrival_time = args.arrival_dist.sample(mean=dynamic_mean_iat)
 
@@ -474,13 +479,17 @@ def long_arriv_gen(env, args):
     for caller_count in itertools.count(start=1):
         # Get dynamic mean IAT based on current simulation time
         current_time = env.now
-        dynamic_mean_iat = get_dynamic_mean_iat(current_time, args.long_transact_short_iat, args.long_transact_long_iat, args.peak_min, args.peak_min_standard_deviation)
+        dynamic_mean_iat = get_dynamic_mean_iat(current_time, 
+                                                args.long_transact_short_iat, 
+                                                args.long_transact_long_iat, 
+                                                args.peak_min, 
+                                                args.peak_min_standard_deviation)
         
         # Sample with updated mean
         inter_arrival_time = args.arrival_dist.sample(mean=dynamic_mean_iat)
 
         yield env.timeout(inter_arrival_time)
-
+        
         env.process(service(caller_count, env, args, customer_type='long'))
 
 def single_run(experiment, rep=0, rc_period=RESULTS_COLLECTION_PERIOD):
@@ -523,31 +532,13 @@ def month_run(blank_xp,
               last_day_of_month, 
               force_max, 
               force_min, 
-              rate = 5, 
+              rate, 
               seed = 0, 
-              rand_toggle=False, 
               rc_period = RESULTS_COLLECTION_PERIOD):
-    """"
-    Runs simulations for a whole month of operations, assuming that there is an increase of incoming short transaction customers during salary days.
-    Params:
-    blank_xp = Experiment() to be loaded, with some fixed parameters
-    last_day_of_month = Last day of the month. Can be 28, 29, 30, 31.
-    force_max = Maximum daily mean inter-arrival time. This is the inter-arrival time for short transaction customers on the day with the lowest traffic.
-    force_min = Minimum daily mean inter-arrival time. This is the inter-arrival time for short transaction customers on salary days/high traffic days.
-    rate = growth rate of the daily mean IAT. larger rate means daily IAT is lower on most days
-    seed = random seed used for the run. Can be used to rerun specific "scenarios".
-    rand_toggle = If True, then every day uses a different set of random numbers for sampling. Otherwise, rand_toggle=False causes the same set of random numbers to be used for sampling despite rerunning the simulation.
-    rc_period = results collection period.
-    """
     
     run_days = [k for k in range(last_day_of_month)]
     rand = daily_rand()
-
-    if rand_toggle:
-        random_int = np.random.randint(1, 100)
-        rand.set_random_no_set(random_int)
-    else:
-        rand.set_random_no_set(seed)
+    rand.set_random_no_set(seed)
 
     run_seed = [rand.daily_rand.sample() for k in run_days]
 
@@ -598,6 +589,7 @@ def month_run(blank_xp,
 
 
     return run_results
+
 
 
     

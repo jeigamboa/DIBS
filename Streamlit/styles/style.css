@@ -62,7 +62,7 @@ div.stButton > button:first-child:hover {
 }
 
 /* Add right arrow to all Streamlit buttons */
-/*div.stButton > button:first-child::after {
+div.stButton > button:first-child::after {
     content: "→";
     font-family: "Segoe UI Symbol", "Arial", sans-serif;
     display: inline-block;
@@ -71,7 +71,7 @@ div.stButton > button:first-child:hover {
     font-weight: 700;
     vertical-align: middle;
     transition: margin-left 0.18s;
-}*/
+}
 div.stButton > button:first-child:hover::after {
     margin-left: 1em;
 }

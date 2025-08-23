@@ -17,7 +17,7 @@ def local_css(file_name):
 
 local_css("styles/style.css")  # Adjust path as needed
 
-st.title('Single-Day Branch Simulator')
+st.title('Single-Day Dynamic Branch Simulator')
 
 branch_data = pd.read_csv('data/data_with_brgy_population_iat_area.csv')
 loc_dict= {'Branch Name': branch_data['Branch'],
@@ -54,7 +54,7 @@ with col1:
     st.write('Operational Variables')
     n_operators = st.slider('Short Transaction Tellers', 1, 15, 2, step=1)
     n_long_operators = st.slider('Long Transaction Tellers', 1, 10, 2, step=1)
-    ratio = st.slider('Waiting Area to Floor Area Ratio', 0.005, 1.0, 0.05, step=0.005)
+    ratio = st.slider('Waiting Area to Floor Area Ratio', 0.005, 0.5, 0.05, step=0.005)
 
     ###Customer preferences and behavior
 
@@ -69,7 +69,7 @@ with col1:
                             help='This adjusts the daily mean inter-arrival time of customers seeking to do short transactions.')
     #long_transact_mean_iat = st.slider('Long Transaction Mean Inter-Arrival Time (mins)', 45, 180, 75 , step=1,
     #                                   help='Set the probability that an incoming customer will do a long transaction.')
-    customer_cap = int(np.ceil(branch_row['Area_sqm']*ratio / customer_preferred_area)) + n_operators + n_long_operators #calculate customer capacity from branch data.
+    customer_cap = int(np.ceil(branch_row['Area_sqm']*ratio / customer_preferred_area)) #calculate customer capacity from branch data.
 
     user_experiment = Experiment(n_operators=n_operators,
                                 n_long_operators=n_long_operators,
@@ -124,7 +124,7 @@ with col2:
         
         plt_dat_out = pd.DataFrame.from_dict({
             'Arrival time of customer': out_toa,
-            'Waiting time outside of branch (mins)': results['07_outside_wait_times']
+            'Waiting time outside branch (mins)': results['07_outside_wait_times']
         })
 
         st.subheader("Waiting times of customers performing short transactions")
@@ -140,7 +140,7 @@ with col2:
             st.write('The branch exceeded its physical capacity.')
 
             st.line_chart(plt_dat_out, x='Arrival time of customer', 
-                        y='Waiting time outside of branch (mins)')
+                        y='Waiting time outside branch (mins)')
 
         
         
