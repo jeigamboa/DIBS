@@ -398,21 +398,21 @@ def service(identifier, env, args, customer_type):
             args.results['outside_waiting_times'].append(outside_wait_time)
             args.results['outside_waiting_times_time_of_arrival'].append(start_wait)
 
-        with args.operators.request() as req:
-            yield req
+            with args.operators.request() as req:
+                yield req
 
-            wait_time = env.now - start_wait
+                wait_time = env.now - start_wait
 
-            args.results['short_transact_waiting_times'].append(wait_time) 
-            #transaction waiting times are inclusive of the outside waiting time
-            args.results['short_transact_time_of_arrival'].append(start_wait)
+                args.results['short_transact_waiting_times'].append(wait_time) 
+                #transaction waiting times are inclusive of the outside waiting time
+                args.results['short_transact_time_of_arrival'].append(start_wait)
 
-            call_duration = args.call_dist.sample()
+                call_duration = args.call_dist.sample()
 
-            #sched process to begin after call_duration
-            yield env.timeout(call_duration)
+                #sched process to begin after call_duration
+                yield env.timeout(call_duration)
 
-            args.results['total_short_transact_duration'] += call_duration
+                args.results['total_short_transact_duration'] += call_duration
             
     elif customer_type =='long':
         
@@ -423,22 +423,22 @@ def service(identifier, env, args, customer_type):
             args.results['outside_waiting_times'].append(outside_wait_time)
             args.results['outside_waiting_times_time_of_arrival'].append(start_wait)    
 
-        with args.long_operators.request() as long_req:
-            yield long_req
-            
-            wait_time = env.now - start_wait
+            with args.long_operators.request() as long_req:
+                yield long_req
+                
+                wait_time = env.now - start_wait
 
-            args.results['long_transact_waiting_times'].append(wait_time)
-            #long transaction waiting times are inclusive of outside waiting times
-            args.results['long_transact_time_of_arrival'].append(start_wait)
+                args.results['long_transact_waiting_times'].append(wait_time)
+                #long transaction waiting times are inclusive of outside waiting times
+                args.results['long_transact_time_of_arrival'].append(start_wait)
 
 
-            call_duration = args.long_call_dist.sample()
+                call_duration = args.long_call_dist.sample()
 
-            #sched process to begin after call_duration
-            yield env.timeout(call_duration)
+                #sched process to begin after call_duration
+                yield env.timeout(call_duration)
 
-            args.results['total_long_transact_duration'] += call_duration
+                args.results['total_long_transact_duration'] += call_duration
 
     else:
         raise ValueError(f"Unknown customer type: {customer_type}")
@@ -599,97 +599,5 @@ def month_run(blank_xp,
 
     return run_results
 
-def parallel_run_one_day(data, rep=0):
 
-    #Runs multiple branches in parallel
-    #Accepts dataframe of branches with parameters
-    '''input:data must be cleaned for code to work(all columns in data as a df are variable names)
-    
-    output: dataframe of wait time, teller util, etc. the indexing of the branches from the input is followed'''
-
-    branch_experiments = []
-
-    for branch_id in range(len(data)):
-        exp = Experiment(**data.iloc[branch_id].to_dict())  # customize per branch
-
-        #run each single experiment
-        xp = single_run(exp, rep=rep, rc_period=RESULTS_COLLECTION_PERIOD)
-
-        branch_experiments.append(xp)
-
-
-    ##Clean up output into dataframe
-    branch_mean_wait_time_1d = []
-    branch_teller_util_1d = []
-    branch_mean_outside_wait_time_1d = []
-    branch_long_teller_util_1d = []
-
-    for k in branch_experiments:
-        branch_mean_wait_time_1d.append(np.float64(k['01_mean_wait_time']))
-        branch_teller_util_1d.append(np.float64(k['02_teller_util']))
-        branch_mean_outside_wait_time_1d.append(np.float64(k['03_mean_outside_wait_time']))
-        branch_long_teller_util_1d.append(np.float64(k['04_long_teller_util']))
-
-
-    results_df = pd.DataFrame.from_dict({'01_mean_wait_time_1d':branch_mean_wait_time_1d ,
-                                        '02_teller_util_1d':branch_teller_util_1d,
-                                        '03_mean_outside_wait_time':branch_mean_outside_wait_time_1d,
-                                        '04_long_teller_util_1d': branch_long_teller_util_1d
-                                        })
-
-    return results_df
-
-def parallel_run_n_days(data, n_days, random_toggle=False):
-    #random_toggle= False by default
-    #if random_toggle is on, the run uses different seeds for each day
-
-    ##seed sequence is fixed [0, 1, 2, ...] if random_toggle=False
-    seed_sequence = [k for k in range(n_days)]
-    if random_toggle:
-        seed_sequence = np.random.randint(1, 100, size=n_days)
-
-    n_rows = len(data)
-    n_cols = N_METRICS
-
-    save_data = np.zeros((n_days, n_rows, n_cols))
-
-    for i in range(len(seed_sequence)):
-        seed = seed_sequence[i]
-        day_df = parallel_run_one_day(data, rep=seed) #use seed from seed sequence to introduce variation per day
-        save_data[i, : , 0] = day_df['01_mean_wait_time_1d'] 
-        save_data[i, : , 1] = day_df['02_teller_util_1d']
-        save_data[i, : , 2] = day_df['03_mean_outside_wait_time']
-        save_data[i, : , 3] = day_df['04_long_teller_util_1d']
-
-    return save_data
-
-def single_run_n_days(exp, n_days, random_toggle=False):
-    '''Runs a single branch for n_days.
-    experiment= Experiment(*parameters specified).
-    random_toggle=False by default. A fixed seed is used if random_toggle=False. 
-    If random_toggle=True, a seed sequence is generated and used.
-    Each seed in the seed_sequence is used in the replication value (rep) of the single_run command.'''
-    #random_toggle= False by default
-    #To do: make it possible to get time series data from time stamps?(?)
-    #if random_toggle is on, the run uses different seeds for each day
-
-    ##seed sequence is fixed [0, 1, 2, ...] if random_toggle=False
-    seed_sequence = [k for k in range(n_days)]
-    if random_toggle:
-        seed_sequence = np.random.randint(1, 100, size=n_days)
-
-    run_dict = []
-    
-    
-    for i in range(len(seed_sequence)):
-        seed = seed_sequence[i]
-        
-        run_dict.append(single_run(exp,rep=seed))
-
-    run_dict_transform = {'01_mean_wait_time': [k['01_mean_wait_time'] for k in run_dict],
-                          '02_teller_util': [k['02_teller_util'] for k in run_dict],
-                          '03_mean_outside_wait_time': [k['03_mean_outside_wait_time'] for k in run_dict],
-                          '04_long_teller_util': [k['04_long_teller_util'] for k in run_dict]}
-
-    return pd.DataFrame.from_dict(run_dict_transform)
     
