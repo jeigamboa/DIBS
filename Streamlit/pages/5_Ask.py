@@ -6,17 +6,14 @@ from dotenv import load_dotenv
 import streamlit as st
 
 # Import langchain
-from langchain.agents import AgentExecutor
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain.agents import AgentExecutor, create_tool_calling_agent
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder, PromptTemplate
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import SystemMessage, AIMessage, HumanMessage
-from langchain.agents import create_tool_calling_agent
-from langchain import hub
-from langchain_core.prompts import PromptTemplate
 from langchain_community.vectorstores import SupabaseVectorStore
-from langchain_openai import OpenAIEmbeddings
 from langchain_core.tools import tool
+from langchain import hub
 
 # Import supabase.db
 from supabase.client import Client, create_client
@@ -40,8 +37,7 @@ vector_store = SupabaseVectorStore(
     embedding=embeddings,
     client=supabase,
     table_name="documents",
-    query_name="match_documents",
-)
+    query_name="match_documents",)
  
 # Initiating llm
 llm = ChatOpenAI(model="gpt-4o-mini", 
@@ -87,10 +83,8 @@ for message in st.session_state.messages:
         with st.chat_message("assistant"):
             st.markdown(message.content)
 
-
 # Create the bar where we can type messages
 user_question = st.chat_input("How may I help you?")
-
 
 # Did the user submit a prompt?
 if user_question:
