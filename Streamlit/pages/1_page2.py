@@ -130,15 +130,34 @@ with col2:
         st.subheader("Waiting times of customers performing short transactions")
         st.line_chart(plt_dat_s, x='Arrival time of customer', 
                         y='Waiting time (mins)')
+        
+        st.markdown(
+        f"""
+        
+        <b>Mean Wait Time:  </b> {results['01_mean_wait_time']:.2f} mins<br>
+        <b>Teller Utilization:</b> {results['02_teller_util']:.2f}%
+        
+        """, unsafe_allow_html=True
+        )
 
         st.subheader('Waiting times of customers performing long transactions')
         st.line_chart(plt_dat_l, x='Arrival time of customer', 
                         y='Waiting time (mins)')
+        st.markdown(f"""
+                    <b>Long Teller Utilization:</b> {results['04_long_teller_util']:.2f}%
+                    
+                    """, unsafe_allow_html=True)
+
         
         find_gr_0 = np.where(np.array(results['07_outside_wait_times']) > 0.01)[0]
         if len(find_gr_0) > 0:
+            st.divider()
             st.write('The branch exceeded its physical capacity.')
-
+            st.markdown(f"""
+                        
+                        <b>Mean Outside Wait Time:</b> {results['03_mean_outside_wait_time']:.2f} mins
+                        
+                        """, unsafe_allow_html=True)
             st.line_chart(plt_dat_out, x='Arrival time of customer', 
                         y='Waiting time outside branch (mins)')
 

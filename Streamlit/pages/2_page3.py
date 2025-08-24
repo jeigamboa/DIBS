@@ -113,14 +113,22 @@ with col2:
         plt_days = np.array([k+1 for k in run_days])
         plt_dat= pd.DataFrame.from_dict({
             'Calendar day': plt_days,
-            'Daily Mean Waiting Time (mins)': results['01_1month_mean_wait_time'],
-            'Daily Mean Outside Waiting Time (mins)': results['03_1month_mean_outside_wait_time']
+            'Short Transactions (mins)': results['01_1month_mean_wait_time'],
+            'Outside Waiting Time (mins)': results['03_1month_mean_outside_wait_time'],
+            'Short Transaction Teller Utilization (%)': results['02_1month_teller_util'],
+            'Long Transaction Teller Utilization (%)': results['04_1month_long_teller_util']
             })
         
-        st.subheader('Mean waiting times for short transactions over a month')
+        st.subheader('Daily mean waiting times over a month')
         st.line_chart(plt_dat, x='Calendar day', 
-                y='Daily Mean Waiting Time (mins)')
+                y=['Short Transactions (mins)',
+                   'Outside Waiting Time (mins)'])
         
-        st.subheader('Mean outside waiting times over a month')
+        #st.subheader('Mean outside waiting times over a month')
+        #st.line_chart(plt_dat, x='Calendar day', 
+        #        y='Daily Mean Outside Waiting Time (mins)')
+        
+        st.subheader('Teller Utilization')
         st.line_chart(plt_dat, x='Calendar day', 
-                y='Daily Mean Outside Waiting Time (mins)')
+                y=['Short Transaction Teller Utilization (%)',
+                   'Long Transaction Teller Utilization (%)'])
