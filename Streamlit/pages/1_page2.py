@@ -30,7 +30,7 @@ chart_df = pd.DataFrame.from_dict(loc_dict)
 
 option = st.session_state.get("selected_branch", branch_data['Branch'].iloc[0])
 chart_df['color'] = chart_df['Branch Name'].apply(
-    lambda name: [255, 0, 0] if name == option else [0, 100, 255]
+    lambda name: [115, 0, 35] if name == option else [0, 50, 125]
 )
 branch_row = branch_data[branch_data['Branch'] == option].iloc[0]
 
@@ -51,14 +51,14 @@ with col1:
 
     st.subheader('Simulation variables')
     ###OPERATION VARIABLES
-    st.write('Operational Variables')
+    st.markdown('<b>Operational Variables</b>',unsafe_allow_html=True)
     n_operators = st.slider('Short Transaction Tellers', 1, 15, 2, step=1)
     n_long_operators = st.slider('Long Transaction Tellers', 1, 10, 2, step=1)
     ratio = st.slider('Waiting Area to Floor Area Ratio', 0.005, 0.5, 0.05, step=0.005)
 
     ###Customer preferences and behavior
 
-    st.write('Customer Variables')
+    st.markdown('<b>Customer Variables</b>', unsafe_allow_html=True)
     customer_preferred_area = st.slider('Area per customer (sq. m)', 0.5, 2.5, 1.0, step=0.05)
 
     if branch_row['Mean_iat'] < 7.0:
@@ -76,7 +76,7 @@ with col1:
                                 customer_capacity=customer_cap, base_mean_iat = mean_iat)
     
     
-    st.write('Randomness Control')
+    st.markdown('<b>Randomness Control</b>', unsafe_allow_html=True)
 
     RANDOM_ = st.button('Random Run')
     if RANDOM_: 
@@ -131,22 +131,44 @@ with col2:
         st.line_chart(plt_dat_s, x='Arrival time of customer', 
                         y='Waiting time (mins)')
         
-        st.markdown(
-        f"""
-        
-        <b>Mean Wait Time:  </b> {results['01_mean_wait_time']:.2f} mins<br>
-        <b>Teller Utilization:</b> {results['02_teller_util']:.2f}%
-        
-        """, unsafe_allow_html=True
-        )
+
+        col3, col4 = st.columns([4.5, 4.5], gap='large')
+
+        with col3:
+            st.markdown(
+            f"""
+            <b>Mean waiting time:  </b> <br>
+            <font size=12>{results['01_mean_wait_time']:.2f} mins </font><br>
+            """, unsafe_allow_html=True
+            )
+
+        with col4:
+            st.markdown(
+            f"""
+            <b>Short transaction teller utilization:</b> <br>
+            <font size=12>{results['02_teller_util']:.2f}% </font><br>
+            """, unsafe_allow_html=True
+            )
 
         st.subheader('Waiting times of customers performing long transactions')
         st.line_chart(plt_dat_l, x='Arrival time of customer', 
                         y='Waiting time (mins)')
-        st.markdown(f"""
-                    <b>Long Teller Utilization:</b> {results['04_long_teller_util']:.2f}%
-                    
-                    """, unsafe_allow_html=True)
+
+        col3, col4 = st.columns([4.5, 4.5], gap='large')
+
+        with col3:
+            st.markdown(
+                f"""
+                <b>Mean waiting time:</b> <br>
+                <font size=12>{np.mean(plt_dat_l['Waiting time (mins)']):.2f} mins </font>
+                """, unsafe_allow_html=True)
+        
+        with col4:
+            st.markdown(
+                f"""
+                <b>Long transaction teller utilization:</b> <br>
+                <font size=12>{results['04_long_teller_util']:.2f}% </font>
+                """, unsafe_allow_html=True)
 
         
         find_gr_0 = np.where(np.array(results['07_outside_wait_times']) > 0.01)[0]

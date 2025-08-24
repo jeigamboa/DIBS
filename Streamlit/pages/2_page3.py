@@ -53,19 +53,19 @@ with col1:
 
     st.subheader('Simulation variables')
     ###OPERATION VARIABLES
-    st.markdown('Operational Variables')
+    st.markdown('<b>Operational Variables</b>',unsafe_allow_html=True)
     n_operators = st.slider('Short Transaction Tellers', 1, 15, 2, step=1)
     n_long_operators = st.slider('Long Transaction Tellers', 1, 10, 2, step=1)
     ratio = st.slider('Waiting Area to Floor Area Ratio', 0.005, 1.0, 0.05, step=0.005)
 
     ###Customer preferences and behavior
 
-    st.write('Customer Variables')
+    st.markdown('<b>Customer Variables</b>', unsafe_allow_html=True)
     customer_preferred_area = st.slider('Area per customer (sq. m)', 0.5, 2.5, 1.0, step=0.05)
 
     customer_cap = int(np.ceil(branch_row['Area_sqm']*ratio / customer_preferred_area)) #calculate customer capacity from branch data.
 
-    st.write('Seasonality Variables')
+    st.markdown('<b>Seasonality Variables</b>', unsafe_allow_html=True)
     last_day_of_month = st.slider('Last day of Month', 28, 31, 30, step=1)
     force_max = st.slider('Max. Daily Mean IAT (mins)', 1.0, 30.0, 10.0, step = 0.1,
                           help='Highest daily mean inter-arrival time (IAT) of customers that wish to do short transactions. Corresponds to IAT on a "slow" day.')
@@ -79,7 +79,7 @@ with col1:
                                 n_long_operators=n_long_operators,
                                 customer_capacity=customer_cap)
     
-    st.write('Randomness Control')
+    st.markdown('<b>Randomness Control</b>', unsafe_allow_html=True)
 
     RANDOM_ = st.button('Random Run')
     if RANDOM_: 

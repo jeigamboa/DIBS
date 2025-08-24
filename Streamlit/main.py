@@ -115,34 +115,54 @@ with col2:
     st.markdown(
         f"""
         <div class="sim-results">
-        <b>Mean Wait Time:  </b> {sim_results['01_mean_wait_time']:.2f} mins<br>
-        <b>Teller Utilization:</b> {sim_results['02_teller_util']:.2f}%<br>
-        <b>Mean Outside Wait Time:</b> {sim_results['03_mean_outside_wait_time']:.2f} mins<br>
-        <b>Long Teller Utilization:</b> {sim_results['04_long_teller_util']:.2f}%
+        <b>Mean Waiting Time:  </b> <br>
+        <font size=12>{sim_results['01_mean_wait_time']:.2f} mins</font><br>
         </div>
         """, unsafe_allow_html=True
     )
     
     st.markdown('</div>', unsafe_allow_html=True)
 
+col3, col4, col5 = st.columns([3, 3, 4], gap="large")
+with col3:
+    st.markdown(f"""<b> Short Transaction Teller Utilization: </b> <br>
+                <font size=12> {sim_results['02_teller_util']:.2f}%</font>
+                """, unsafe_allow_html=True)
+    
+with col4:
+    st.markdown(f"""<b> Long Transaction Teller Utilization: </b> <br>
+                <font size=12> {sim_results['04_long_teller_util']:.2f}%</font>
+                """, unsafe_allow_html=True)
+
+with col5:
+    st.markdown(f"""<b> Mean Outside Waiting Time: </b> <br>
+                <font size=12> {sim_results['03_mean_outside_wait_time']:.2f} mins</font>
+                """, unsafe_allow_html=True)    
+
 st.divider()
 ###plot line chart
+
+s_toa = pd.to_timedelta(sim_results['06_short_transact_time_of_arrival'], unit="m") + pd.Timestamp("09:00:00")
+short_toa = s_toa.strftime("%H:%M:%S")
+
 plt_dat_s = pd.DataFrame.from_dict({
-    'Arrival time of customer (h)': 9 + (np.array(sim_results['06_short_transact_time_of_arrival']))/60,
+    'Arrival time of customer': short_toa,
     'Waiting time (mins)': sim_results['05_short_transact_wait_times']
     })
 
+l_toa = pd.to_timedelta(sim_results['10_long_transact_wait_times_time_of_arrival'], unit="m") + pd.Timestamp("09:00:00")
+long_toa = l_toa.strftime("%H:%M:%S")
 
 plt_dat_l = pd.DataFrame.from_dict({
-    'Arrival time of customer (h)': 9 +  (np.array(sim_results['10_long_transact_wait_times_time_of_arrival']))/60,
+    'Arrival time of customer':l_toa,
     'Waiting time (mins)': sim_results['09_long_transact_wait_times']
     })
 
 st.subheader("Waiting times of customers performing short transactions")
-st.line_chart(plt_dat_s, x='Arrival time of customer (h)', 
+st.line_chart(plt_dat_s, x='Arrival time of customer', 
                 y='Waiting time (mins)')
 
 st.subheader('Waiting times of customers performing long transactions')
-st.line_chart(plt_dat_l, x='Arrival time of customer (h)', 
+st.line_chart(plt_dat_l, x='Arrival time of customer', 
                 y='Waiting time (mins)')
     
