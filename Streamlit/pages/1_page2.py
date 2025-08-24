@@ -1,7 +1,13 @@
+import os
 import streamlit as st
 import pandas as pd
 import numpy as np
+import overpy
+from streamlit_folium import st_folium
+import folium
 from banksim.model import Experiment, single_run
+import pydeck as pdk
+import xml.etree.ElementTree as ET
 
 if "seed_gen" not in st.session_state:
     st.session_state.seed_gen = 0  # default
@@ -17,6 +23,51 @@ def local_css(file_name):
 
 local_css("styles/style.css")  # Adjust path as needed
 
+###XML directory
+XML_DIR = "data/XML_With_Nodes"
+overp_api = overpy.Overpass()
+
+branch_data_ = []
+
+# Load all XML files
+for filename in os.listdir(XML_DIR):
+    if filename.endswith(".xml"):
+        filepath = os.path.join(XML_DIR, filename)
+        tree = ET.parse(filepath)
+        root = tree.getroot()
+
+        way = root.find(".//way")
+        if way is None:
+            continue
+
+        node_refs = [nd.attrib["ref"] for nd in way.findall("nd")]
+        tags = {tag.attrib["k"]: tag.attrib["v"] for tag in way.findall("tag")}
+
+        # Query Overpass for coords
+        query = f"""
+        (
+          {"".join([f'node({ref});' for ref in node_refs])}
+        );
+        out body;
+        """
+        result = overp_api.query(query)
+
+        node_coord_map = {str(node.id): (float(node.lat), float(node.lon)) for node in result.nodes}
+        ordered_coords = [node_coord_map[ref] for ref in node_refs if ref in node_coord_map]
+
+        branch_data_.append({
+            "file": filename,
+            "tags": tags,
+            "node_refs": node_refs,
+            "ordered_coords": ordered_coords
+        })
+
+xml_filename_to_branch_name = {'BPI V. Luna - Kalayaan, V. Luna Road': "BPI_Kalayaan_Ave.xml",
+'BPI Family Bank, Anonas Street': "BPI_Kamias_Anonas.xml",
+'BPI Family Bank, Anonas Street': "BPI_Kamias_Road.xml",
+'BPI Katipunan Loyola Heights 325 Miranda Building, Fabian De La Rosa Katipunan Avenue': "BPI_Loyola_Katipunan.xml", 
+'BPI, Quezon Avenue': "BPI_Quezon_Avenue.xml"}
+
 st.title('Single-Day Dynamic Branch Simulator')
 
 branch_data = pd.read_csv('data/data_with_brgy_population_iat_area.csv')
@@ -26,23 +77,68 @@ loc_dict= {'Branch Name': branch_data['Branch'],
            'base_mean_iat': branch_data['Mean_iat'],
            'branch area': branch_data['Area_sqm']}
 
-chart_df = pd.DataFrame.from_dict(loc_dict)
-
 option = st.session_state.get("selected_branch", branch_data['Branch'].iloc[0])
-chart_df['color'] = chart_df['Branch Name'].apply(
-    lambda name: [115, 0, 35] if name == option else [0, 50, 125]
-)
-branch_row = branch_data[branch_data['Branch'] == option].iloc[0]
+col1, col2 = st.columns([6,4],gap='large')
 
-st.subheader('Branch')
+with col2:
+    branch_row = branch_data[branch_data['Branch'] == option].iloc[0]
 
-option = st.selectbox(
+    st.subheader('Branch')
 
-        'Select a branch:',
-        branch_data['Branch'],
-        index=branch_data['Branch'].tolist().index(option) if option in branch_data['Branch'].tolist() else 0,
-        key="selected_branch"
-    )
+    option = st.selectbox(
+
+            'Select a branch:',
+            branch_data['Branch'],
+            index=branch_data['Branch'].tolist().index(option) if option in branch_data['Branch'].tolist() else 0,
+            key="selected_branch"
+        )
+    
+    st.markdown(f"""<b>Estimated floor area:</b> <br>
+                <font size=12>{branch_row['Area_sqm']} sq. m</font> <br><br>
+                <b>Estimated mean IAT for short transactions:</b> <br>
+                <font size=12>{branch_row['Mean_iat']:.2f} mins</font>
+                """, unsafe_allow_html=True)
+
+with col1:
+    if option in xml_filename_to_branch_name.keys():
+        polygon_filename = xml_filename_to_branch_name[option]
+        selected_branch = next(b for b in branch_data_ if b["file"] == polygon_filename)
+        tags = selected_branch["tags"]
+        node_refs = selected_branch["node_refs"]
+        ordered_coords = selected_branch["ordered_coords"]
+
+        # Build DataFrame for display
+        df = pd.DataFrame([
+            {"node_id": ref, "lat": lat, "lon": lon}
+            for ref, (lat, lon) in zip(node_refs, ordered_coords)
+        ])
+        center = [df["lat"].mean(), df["lon"].mean()]
+        m = folium.Map(location=center, zoom_start=18, height=400)
+
+        folium.Polygon(
+            locations=ordered_coords,
+            color="blue",
+            weight=2,
+            fill=True,
+            fill_color="blue",
+            fill_opacity=0.4,
+            tooltip=tags.get("name", selected_branch)
+        ).add_to(m)
+        
+        m.fit_bounds(ordered_coords)
+
+        st_folium(m, height=400)
+    else:
+        center = [branch_row["Latitude"], branch_row["Longitude"]]
+        m = folium.Map(location=center, zoom_start=18)
+        folium.Marker(
+            location=[branch_row["Latitude"], branch_row["Longitude"]],
+            popup=branch_row["Branch"],
+            tooltip=branch_row["Branch"]
+        ).add_to(m)
+
+        # Show in Streamlit
+        st_folium(m, width=500, height=400)
 
 st.divider()
 
@@ -182,8 +278,3 @@ with col2:
                         """, unsafe_allow_html=True)
             st.line_chart(plt_dat_out, x='Arrival time of customer', 
                         y='Waiting time outside branch (mins)')
-
-        
-        
-
-    
