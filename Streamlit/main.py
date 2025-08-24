@@ -38,7 +38,7 @@ header_img_path = "header.png"  # <-- change filename if needed
 header_col1, header_col2 = st.columns([0.8, 6], gap="small")
 with header_col1:
     # display local image (logo / header image)
-    st.image(header_img_path, width=80)  # reduced from 94 to 80
+    st.image(header_img_path, width=400)  # reduced from 94 to 80
 
 with header_col2:
     st.markdown(
