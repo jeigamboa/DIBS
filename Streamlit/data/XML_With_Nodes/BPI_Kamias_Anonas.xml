@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="openstreetmap-cgimap 2.1.0 (682945 spike-08.openstreetmap.org)" copyright="OpenStreetMap and contributors" attribution="http://www.openstreetmap.org/copyright" license="http://opendatacommons.org/licenses/odbl/1-0/">
+ <way id="261827209" visible="true" version="2" changeset="98198864" timestamp="2021-01-27T05:23:49Z" user="GOwin" uid="1041828">
+  <nd ref="2674513705"/>
+  <nd ref="2674513702"/>
+  <nd ref="2674513663"/>
+  <nd ref="2674513656"/>
+  <nd ref="2674513660"/>
+  <nd ref="2674513665"/>
+  <nd ref="2674513667"/>
+  <nd ref="2674513705"/>
+  <tag k="addr:city" v="Quezon City"/>
+  <tag k="addr:housenumber" v="137"/>
+  <tag k="addr:street" v="Kamias Road"/>
+  <tag k="amenity" v="bank"/>
+  <tag k="atm" v="yes"/>
+  <tag k="branch" v="Kamias Anonas"/>
+  <tag k="brand" v="BPI"/>
+  <tag k="brand:wikidata" v="Q2501256"/>
+  <tag k="brand:wikipedia" v="en:Bank of the Philippine Islands"/>
+  <tag k="landuse" v="commercial"/>
+  <tag k="name" v="BPI"/>
+  <tag k="official_name" v="Bank of the Philippine Islands"/>
+ </way>
+</osm>

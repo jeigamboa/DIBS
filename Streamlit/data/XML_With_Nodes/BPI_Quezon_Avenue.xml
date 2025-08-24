@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="openstreetmap-cgimap 2.1.0 (682935 spike-08.openstreetmap.org)" copyright="OpenStreetMap and contributors" attribution="http://www.openstreetmap.org/copyright" license="http://opendatacommons.org/licenses/odbl/1-0/">
+ <way id="261031113" visible="true" version="2" changeset="71042930" timestamp="2019-06-08T04:35:59Z" user="Tannel" uid="6711888">
+  <nd ref="2666404341"/>
+  <nd ref="2666404335"/>
+  <nd ref="2666404330"/>
+  <nd ref="2666404333"/>
+  <nd ref="2666404341"/>
+  <tag k="addr:city" v="Quezon City"/>
+  <tag k="addr:street" v="Quezon Avenue"/>
+  <tag k="amenity" v="bank"/>
+  <tag k="brand" v="BPI"/>
+  <tag k="brand:wikidata" v="Q2501256"/>
+  <tag k="brand:wikipedia" v="en:Bank of the Philippine Islands"/>
+  <tag k="building" v="yes"/>
+  <tag k="name" v="BPI"/>
+  <tag k="official_name" v="Bank of the Philippine Islands"/>
+ </way>
+</osm>

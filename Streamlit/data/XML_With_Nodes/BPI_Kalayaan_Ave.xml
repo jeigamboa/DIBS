@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="openstreetmap-cgimap 2.1.0 (682936 spike-08.openstreetmap.org)" copyright="OpenStreetMap and contributors" attribution="http://www.openstreetmap.org/copyright" license="http://opendatacommons.org/licenses/odbl/1-0/">
+ <way id="116845058" visible="true" version="2" changeset="30147667" timestamp="2015-04-11T17:27:26Z" user="jenjereren" uid="1940553">
+  <nd ref="1316289928"/>
+  <nd ref="1316290011"/>
+  <nd ref="1316289930"/>
+  <nd ref="1316289960"/>
+  <nd ref="1316289928"/>
+  <tag k="amenity" v="bank"/>
+  <tag k="atm" v="yes"/>
+  <tag k="building" v="yes"/>
+  <tag k="name" v="BPI"/>
+ </way>
+</osm>
