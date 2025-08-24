@@ -28,7 +28,6 @@ pdf_loader = PyPDFDirectoryLoader(file_path + "documents")
 pdf_docs = pdf_loader.load()
 
 # load csv docs from folder 'csvs'
-
 csv_docs = []
 csv_folder = file_path + "csvs"
 for file in os.listdir(csv_folder):
@@ -41,7 +40,7 @@ for file in os.listdir(csv_folder):
 all_docs = pdf_docs + csv_docs
 
 # split the documents in multiple chunks
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=600)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=8000, chunk_overlap=100)
 docs = text_splitter.split_documents(all_docs)
 
 # store chunks in vector store
@@ -51,6 +50,6 @@ vector_store = SupabaseVectorStore.from_documents(
     client=supabase,
     table_name="documents",
     query_name="match_documents",
-    chunk_size=1000,
+    chunk_size=800,
 )
 

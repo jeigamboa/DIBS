@@ -1,11 +1,11 @@
-# import basics
+# Preliminaries
 import os
 from dotenv import load_dotenv
 
-# import streamlit
+# Import streamlit
 import streamlit as st
 
-# import langchain
+# Import langchain
 from langchain.agents import AgentExecutor
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -18,11 +18,12 @@ from langchain_community.vectorstores import SupabaseVectorStore
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.tools import tool
 
-# import supabase db
+# Import supabase.db
 from supabase.client import Client, create_client
 
-# load environment variables
-load_dotenv(dotenv_path="C:/David/000 Work Prep and Independent Proj/DIBS/gen_AI/.env")  
+# Load environment variables
+file_path = 'C:/David/000 Work Prep and Independent Proj/'
+load_dotenv(dotenv_path=file_path + "/DIBS/gen_AI/.env")  
 
 # initiating supabase
 supabase_url = os.environ.get("SUPABASE_URL")
@@ -41,11 +42,12 @@ vector_store = SupabaseVectorStore(
 )
  
 # initiating llm
-llm = ChatOpenAI(model="gpt-4o",temperature=0)
+llm = ChatOpenAI(model="gpt-4o-mini", 
+                 max_completion_tokens=None,
+                 temperature=0)
 
 # pulling prompt from hub
 prompt = hub.pull("hwchase17/openai-functions-agent")
-
 
 # creating the retriever tool
 @tool(response_format="content_and_artifact")
@@ -54,8 +56,7 @@ def retrieve(query: str):
     retrieved_docs = vector_store.similarity_search(query, k=2)
     serialized = "\n\n".join(
         (f"Source: {doc.metadata}\n" f"Content: {doc.page_content}")
-        for doc in retrieved_docs
-    )
+        for doc in retrieved_docs)
     return serialized, retrieved_docs
 
 # combining all tools
@@ -68,7 +69,7 @@ agent = create_tool_calling_agent(llm, tools, prompt)
 agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
 # initiating streamlit app
-st.set_page_config(page_title="Ask DIBS", page_icon="🦜")
+st.set_page_config(page_title="Ask DIBS")
 st.title("Ask DIBS")
 
 # initialize chat history
@@ -86,7 +87,7 @@ for message in st.session_state.messages:
 
 
 # create the bar where we can type messages
-user_question = st.chat_input("How are you?")
+user_question = st.chat_input("How may I help you?")
 
 
 # did the user submit a prompt?

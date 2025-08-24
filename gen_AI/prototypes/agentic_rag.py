@@ -10,6 +10,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_community.vectorstores import SupabaseVectorStore
 from langchain_openai import OpenAIEmbeddings
 from langchain import hub
+from langchain.chains import retrieval_qa
 
 from supabase.client import Client, create_client
 from langchain_core.tools import tool
@@ -35,7 +36,7 @@ vector_store = SupabaseVectorStore(
 )
 
 # initiate large language model (temperature = 0)
-llm = ChatOpenAI(temperature=0)
+llm = ChatOpenAI(model='gpt-4o-mini',temperature=0)
 
 # fetch the prompt from the prompt hub
 prompt = hub.pull("hwchase17/openai-functions-agent")
