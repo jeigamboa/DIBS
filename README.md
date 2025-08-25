@@ -25,6 +25,8 @@ Python version 3.12 is recommended. Libraries and packages are listed in `gen_re
 
 Upon installation, since we have removed our API keys for safety, please use an your own API keys for supabase and OpenAI and save them in `.env.sample` as `.env`.
 
+Please don't forget to update ``file_path`` in `ingest.py` and `5_Ask_DIBS.py`.
+
 ### Acknowledgments
 
 * Various free online tutorials: 

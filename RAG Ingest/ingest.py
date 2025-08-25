@@ -23,7 +23,7 @@ supabase: Client = create_client(supabase_url, supabase_key)
 embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
 
 # load pdf docs from folder 'documents'
-file_path = "C:/David/000 Work Prep and Independent Proj/" # Change with file path of DIBS on your system
+file_path = "C:/David/000 Work Prep and Independent Proj/" # Replace with path of DIBS on your system
 
 pdf_loader = PyPDFDirectoryLoader(file_path + "DIBS/RAG Ingest/documents")
 pdf_docs = pdf_loader.load()
