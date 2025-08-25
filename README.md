@@ -1,5 +1,4 @@
 ## DIBS: Dynamic and Informed Branch Simulator (DIBS): Improving Branch Location and Layout through Simulation and AI-powered Insights
-# by PISIKA
 
 Project submitted to the BPI DATA Wave 2025 Hackathon, powered by Eskwelabs, by (team) PISIKA, consisting of the ff. authors:
 - David Daffon (SanD-CMPRG),
