@@ -23,13 +23,14 @@ supabase: Client = create_client(supabase_url, supabase_key)
 embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
 
 # load pdf docs from folder 'documents'
-file_path = "C:/David/000 Work Prep and Independent Proj/DIBS/gen_AI/"
-pdf_loader = PyPDFDirectoryLoader(file_path + "documents")
+file_path = "C:/David/000 Work Prep and Independent Proj/" # Change with file path of DIBS on your system
+
+pdf_loader = PyPDFDirectoryLoader(file_path + "DIBS/RAG Ingest/documents")
 pdf_docs = pdf_loader.load()
 
 # load csv docs from folder 'csvs'
 csv_docs = []
-csv_folder = file_path + "csvs"
+csv_folder = file_path + "DIBS/RAG Ingest/csvs"
 for file in os.listdir(csv_folder):
     if file.endswith(".csv"):
         file_path = os.path.join(csv_folder, file)

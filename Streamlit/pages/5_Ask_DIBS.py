@@ -21,8 +21,8 @@ from supabase.client import Client, create_client
 ### Main
 
 # Load environment variables
-file_path = 'C:/David/000 Work Prep and Independent Proj/' # Replace with path of DIBS on your device
-load_dotenv(dotenv_path=file_path + "/DIBS/gen_AI/.env")  
+file_path = 'C:/David/000 Work Prep and Independent Proj/' # Replace with path of DIBS on your system
+load_dotenv(dotenv_path=file_path + "/DIBS/.env")  
 
 # Initiating supabase
 supabase_url = os.environ.get("SUPABASE_URL")
@@ -56,6 +56,10 @@ def retrieve(query: str):
         (f"Source: {doc.metadata}\n" f"Content: {doc.page_content}")
         for doc in retrieved_docs)
     return serialized, retrieved_docs
+
+# Creating simulator tool
+
+
 
 # Combining all tools
 tools = [retrieve]
