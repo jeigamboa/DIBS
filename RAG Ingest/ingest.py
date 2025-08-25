@@ -1,34 +1,36 @@
-# import basics
+### Preliminaries
 import os
 from dotenv import load_dotenv
 
-# import langchain
+# Import langchain
 from langchain_community.document_loaders import PyPDFDirectoryLoader, TextLoader, CSVLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import SupabaseVectorStore
 from langchain_openai import OpenAIEmbeddings
 
-# import supabase
+# Import supabase
 from supabase.client import Client, create_client
 
-# load environment variables
+### Main
+
+# Load environment variables
 load_dotenv()  
 
-# initiate supabase db
+# Initiate supabase db
 supabase_url = os.environ.get("SUPABASE_URL")
 supabase_key = os.environ.get("SUPABASE_SERVICE_KEY")
 supabase: Client = create_client(supabase_url, supabase_key)
 
-# initiate embeddings model
+# Initiate embeddings model
 embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
 
-# load pdf docs from folder 'documents'
+# Load pdf docs from folder 'documents'
 file_path = "C:/David/000 Work Prep and Independent Proj/" # Replace with path of DIBS on your system
 
 pdf_loader = PyPDFDirectoryLoader(file_path + "DIBS/RAG Ingest/documents")
 pdf_docs = pdf_loader.load()
 
-# load csv docs from folder 'csvs'
+# Load csv docs from folder 'csvs'
 csv_docs = []
 csv_folder = file_path + "DIBS/RAG Ingest/csvs"
 for file in os.listdir(csv_folder):
@@ -37,14 +39,14 @@ for file in os.listdir(csv_folder):
         loader = CSVLoader(file_path=file_path, encoding="utf-8")
         csv_docs.extend(loader.load())
 
-# split the documents in multiple chunks
+# Combine documents with csvs
 all_docs = pdf_docs + csv_docs
 
-# split the documents in multiple chunks
+# Split the documents in multiple chunks
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=8000, chunk_overlap=100)
 docs = text_splitter.split_documents(all_docs)
 
-# store chunks in vector store
+# Store chunks in vector store
 vector_store = SupabaseVectorStore.from_documents(
     docs,
     embeddings,

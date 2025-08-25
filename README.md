@@ -29,7 +29,7 @@ Please don't forget to update ``file_path`` in `ingest.py` and `5_Ask_DIBS.py`.
 
 ### Acknowledgments
 
-* Various free online tutorials: 
+* Various free online tutorials.
 * BPI/Eskwelabs mentors for their domain expertise and advice.
 
 
