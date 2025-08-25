@@ -1,5 +1,5 @@
 ### Preliminaries
-import os
+import os, sys
 from dotenv import load_dotenv
 
 # Import streamlit
@@ -17,6 +17,8 @@ from langchain import hub
 
 # Import supabase.db
 from supabase.client import Client, create_client
+
+# Import simulation models
 
 ### Main
 
@@ -56,11 +58,7 @@ def retrieve(query: str):
         (f"Source: {doc.metadata}\n" f"Content: {doc.page_content}")
         for doc in retrieved_docs)
     return serialized, retrieved_docs
-
-# Creating simulator tool
-
-
-
+    
 # Combining all tools
 tools = [retrieve]
 
@@ -76,7 +74,11 @@ st.title("Ask DIBS")
 
 # Initialize chat history
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state.messages = [SystemMessage(content="""
+    You are DIBS, a simulation model AI assistant.
+    Assist the user in interpreting the results of the simulations.
+    - Use `retrieve` for document-based questions.
+    """)]
 
 # Display chat messages from history on app rerun
 for message in st.session_state.messages:

@@ -211,7 +211,8 @@ with col2:
             'Arrival time of customer': short_toa,
             'Waiting time (mins)': results['05_short_transact_wait_times']
             })
-
+        
+        plt_dat_s.to_csv("../../RAG Ingest/csvs/simulate_day_results.csv", index=False)
 
         plt_dat_l = pd.DataFrame.from_dict({
             'Arrival time of customer': long_toa,
