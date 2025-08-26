@@ -9,6 +9,9 @@ from banksim.model import Experiment, single_run
 import pydeck as pdk
 import xml.etree.ElementTree as ET
 
+import time, random
+from pathlib import Path
+
 if "seed_gen" not in st.session_state:
     st.session_state.seed_gen = 0  # default
 
@@ -26,6 +29,15 @@ local_css("styles/style.css")  # Adjust path as needed
 ###XML directory
 XML_DIR = "data/XML_With_Nodes"
 overp_api = overpy.Overpass()
+
+def safe_query(query):
+    while True:
+        try:
+            return overp_api.query(query)
+
+        except overpy.exception.OverpassTooManyRequests:
+            st.warning("Overpass is busy. Retrying in 10 seconds...")
+            time.sleep(10 + random.randint(0, 5)) 
 
 branch_data_ = []
 
@@ -50,7 +62,7 @@ for filename in os.listdir(XML_DIR):
         );
         out body;
         """
-        result = overp_api.query(query)
+        result = safe_query(query) # overp_api.query(query)
 
         node_coord_map = {str(node.id): (float(node.lat), float(node.lon)) for node in result.nodes}
         ordered_coords = [node_coord_map[ref] for ref in node_refs if ref in node_coord_map]
@@ -211,8 +223,6 @@ with col2:
             'Arrival time of customer': short_toa,
             'Waiting time (mins)': results['05_short_transact_wait_times']
             })
-        
-        plt_dat_s.to_csv("../../RAG Ingest/csvs/simulate_day_results.csv", index=False)
 
         plt_dat_l = pd.DataFrame.from_dict({
             'Arrival time of customer': long_toa,
@@ -223,6 +233,15 @@ with col2:
             'Arrival time of customer': out_toa,
             'Waiting time outside branch (mins)': results['07_outside_wait_times']
         })
+
+        out_dir = Path(r"C:/David/000 Work Prep and Independent Proj/DIBS/RAG Ingest/csvs/") ### Switch with path on your system
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_path_s = out_dir / "simulate_day_short.csv"
+        out_path_l = out_dir / "simulate_day_long.csv"
+        out_path_out = out_dir / "simulate_day_out.csv"
+        plt_dat_s.to_csv(out_path_s, index=False)
+        plt_dat_l.to_csv(out_path_l, index=False)
+        plt_dat_out.to_csv(out_path_out, index=False)
 
         st.subheader("Waiting times of customers performing short transactions")
         st.line_chart(plt_dat_s, x='Arrival time of customer', 

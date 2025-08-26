@@ -18,7 +18,8 @@ from langchain import hub
 # Import supabase.db
 from supabase.client import Client, create_client
 
-# Import simulation models
+# For running ingest.py
+import subprocess, sys
 
 ### Main
 
@@ -77,7 +78,11 @@ if "messages" not in st.session_state:
     st.session_state.messages = [SystemMessage(content="""
     You are DIBS, a simulation model AI assistant.
     Assist the user in interpreting the results of the simulations.
-    - Use `retrieve` for document-based questions.
+    simulate_day_short.csv refers to simulation data for short transactions for a day,
+    simulate_day_long.csv refers to simulation data for long transactions for a day,
+    simulate_day_out.csv refers to simulation data for outside waiters for a day,
+    simulate_month.csv refers to simulation data for a month.
+    - Use `retrieve` for document and csv based questions.
     """)]
 
 # Display chat messages from history on app rerun
@@ -105,3 +110,16 @@ if user_question:
     with st.chat_message("assistant"):
         st.markdown(ai_message)
         st.session_state.messages.append(AIMessage(ai_message))
+
+if st.button("Ingest Simulation Data"):
+    with st.spinner("Ingesting..."):
+        result = subprocess.run(
+            [sys.executable, "C:/David/000 Work Prep and Independent Proj/DIBS/RAG Ingest/ingest.py"], ### Change with path on your system
+            capture_output=True, text=True
+        )
+    if result.returncode == 0:
+        st.success("Ingested simulation data ✅")
+        st.text(result.stdout)
+    else:
+        st.error("Error ingesting simulation data ❌")
+        st.text(result.stderr)
